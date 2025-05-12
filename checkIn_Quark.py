@@ -63,11 +63,22 @@ class Quark:
             "sign": self.param.get('sign'),
             "vcode": self.param.get('vcode')
         }
-        response = requests.get(url=url, params=querystring).json()
-        #print(response)
-        if response.get("data"):
-            return response["data"]
+         # 添加重试逻辑
+        for attempt in range(3):  # 最多重试3次
+            try:
+                response = requests.get(url=url, params=querystring, timeout=10).json()
+                if response.get("data"):
+                    return response["data"]
+                else:
+                    return False
+            except requests.ConnectionError as e:
+                print(f"连接错误，第 {attempt + 1} 次尝试失败: {e}")
+                time.sleep(5)  # 等待5秒后重试
+            except Exception as e:
+                print(f"发生异常: {e}")
+                return False  # 返回False以继续脚本逻辑
         else:
+            print("所有尝试均失败，无法获取签到信息")
             return False
 
     def get_growth_sign(self):
@@ -101,11 +112,23 @@ class Quark:
             "kps": self.param.get('kps'),
         }
         response = requests.get(url=url, params=querystring).json()
-        # print(response)
-        if response.get("data"):
-            return response["data"]["balance"]
+        # 添加重试逻辑
+        for attempt in range(3):  # 最多重试3次
+            try:
+                response = requests.post(url=url, json=data, params=querystring, timeout=10).json()
+                if response.get("data"):
+                    return True, response["data"]["sign_daily_reward"]
+                else:
+                    return False, response["message"]
+            except requests.ConnectionError as e:
+                print(f"连接错误，第 {attempt + 1} 次尝试失败: {e}")
+                time.sleep(5)  # 等待5秒后重试
+            except Exception as e:
+                print(f"发生异常: {e}")
+                return False, "未知错误"
         else:
-            return response["msg"]
+            print("所有尝试均失败，无法签到")
+            return False, "网络问题，多次尝试后仍失败"
 
     def do_sign(self):
         '''
