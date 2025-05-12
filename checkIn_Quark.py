@@ -2,6 +2,7 @@ import os
 import re 
 import sys 
 import requests 
+import time
 
 cookie_list = os.getenv("COOKIE_QUARK").split('\n|&&')
 
