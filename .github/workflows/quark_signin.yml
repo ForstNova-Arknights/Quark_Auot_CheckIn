@@ -2,8 +2,8 @@ name: Quark签到
 
 on:
   schedule:
-    - cron: '0 1 * * *'   # 北京时间 09:00 (UTC+8 -> UTC+1)
-    - cron: '0 5 * * *'   # 北京时间 13:00 (UTC+8 -> UTC+5)
+    - cron: '0 1 * * *'   # 北京时间 09:00
+    - cron: '0 5 * * *'   # 北京时间 13:00
   workflow_dispatch:      # 允许手动触发
 
 jobs:
@@ -12,34 +12,26 @@ jobs:
     outputs:
       skip: ${{ steps.check.outputs.skip }}
     steps:
-      - name: 检出代码
-        uses: actions/checkout@v3
+      - name: 获取今日日期（北京时间）
+        run: echo "TODAY=$(TZ='Asia/Shanghai' date '+%Y-%m-%d')" >> $GITHUB_ENV
 
-      - name: 恢复签到成功记录缓存
-        id: cache-success-restore
+      - name: 检查今日是否已有签到成功的缓存
+        id: cache-restore
         uses: actions/cache@v4
         with:
-          path: .last_success_date
-          key: last-success-marker
+          path: .dummy_marker
+          key: quark-sign-success-${{ env.TODAY }}
 
-      - name: 判断是否已签到
+      - name: 决定是否跳过
         id: check
         run: |
-          current_date=$(TZ='Asia/Shanghai' date '+%Y-%m-%d')
-          echo "当前北京时间: $current_date"
-
-          if [ -f .last_success_date ]; then
-            last_date=$(cat .last_success_date)
-            echo "上次签到日期: $last_date"
-            if [ "$last_date" = "$current_date" ]; then
-              echo "今天已成功签到，跳过执行。"
-              echo "skip=false" >> "$GITHUB_OUTPUT"
-              exit 0
-            fi
+          if [ "${{ steps.cache-restore.outputs.cache-hit }}" = "true" ]; then
+            echo "今天已成功签到，跳过执行。"
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "今天尚未签到，继续执行。"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
           fi
-
-          echo "今天尚未签到，继续执行。"
-          echo "skip=true" >> "$GITHUB_OUTPUT"
 
   sign-in:
     needs: check-if-already-signed
@@ -76,19 +68,16 @@ jobs:
           COOKIE_QUARK: ${{ secrets.COOKIE_QUARK }}
         run: python checkIn_Quark.py
 
-      - name: 标记今天签到成功
-        if: success()
-        run: |
-          date_str=$(TZ='Asia/Shanghai' date '+%Y-%m-%d')
-          echo "$date_str" > .last_success_date
-          echo "已记录成功签到日期: $date_str"
-
-      - name: 保存成功记录到缓存
+      - name: 记录今日签到成功缓存
         if: success()
         uses: actions/cache@v4
         with:
-          path: .last_success_date
-          key: last-success-marker
+          path: .dummy_marker
+          key: quark-sign-success-${{ env.TODAY || 'default' }}
+
+      - name: 获取今日日期（用于空提交）
+        if: success() && github.event_name == 'schedule'
+        run: echo "TODAY=$(TZ='Asia/Shanghai' date '+%Y-%m-%d')" >> $GITHUB_ENV
 
       - name: 空提交保持活跃
         if: success() && github.event_name == 'schedule'
