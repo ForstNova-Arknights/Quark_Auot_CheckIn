@@ -39,8 +39,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 检出代码
-        uses: actions/checkout@v3
-
+        uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+      - name: Run mefrp sign
+        env:
+          USER_TOKEN: ${{ secrets.mefrp0 }}
+        run: |
+          node mefrp.js
+          
+      - name: Run mefrp sign
+        env:
+          USER_TOKEN: ${{ secrets.mefrp1 }}
+        run: |
+          node mefrp.js
+          
+      - name: Run mefrp sign
+        env:
+          USER_TOKEN: ${{ secrets.mefrp2 }}
+        run: |
+          node mefrp.js
+          
       - name: 随机延迟（早上）
         if: github.event.schedule == '0 1 * * *'
         run: |
@@ -56,12 +74,12 @@ jobs:
           sleep $delay
 
       - name: 设置Python环境
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: '3.x'
 
-      - name: 安装依赖
-        run: pip install requests
+      # - name: 安装依赖
+      #   run: pip install requests
 
       - name: 执行签到脚本
         env:
@@ -70,24 +88,24 @@ jobs:
 
       - name: 记录今日签到成功缓存
         if: success()
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .dummy_marker
           key: quark-sign-success-${{ env.TODAY || 'default' }}
 
-      - name: 获取今日日期（用于空提交）
-        if: success() && github.event_name == 'schedule'
-        run: echo "TODAY=$(TZ='Asia/Shanghai' date '+%Y-%m-%d')" >> $GITHUB_ENV
+      # - name: 获取今日日期（用于空提交）
+      #   if: success() && github.event_name == 'schedule'
+      #   run: echo "TODAY=$(TZ='Asia/Shanghai' date '+%Y-%m-%d')" >> $GITHUB_ENV
 
-      - name: 空提交保持活跃
-        if: success() && github.event_name == 'schedule'
-        run: |
-          git config --local user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
-          git config --local user.name "${{ github.actor }}"
-          git remote set-url origin https://${{ github.actor }}:${{ github.token }}@github.com/${{ github.repository }}
-          git pull --rebase --autostash
-          git commit --allow-empty -m "CHORE: 保持运行.."
-          git push
+      # - name: 空提交保持活跃
+      #   if: success() && github.event_name == 'schedule'
+      #   run: |
+      #     git config --local user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+      #     git config --local user.name "${{ github.actor }}"
+      #     git remote set-url origin https://${{ github.actor }}:${{ github.token }}@github.com/${{ github.repository }}
+      #     git pull --rebase --autostash
+      #     git commit --allow-empty -m "CHORE: 保持运行.."
+      #     git push
 
       - name: 清理旧的工作流记录
         uses: Mattraks/delete-workflow-runs@main
