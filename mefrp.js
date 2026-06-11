@@ -139,7 +139,7 @@ export default {
         const signData = await signResp.json();
 
         // 6. 返回结果
-      console.log(JSON.stringify({ signData, capToken })
+      console.log(JSON.stringify({ signData, capToken }))
         return new Response(JSON.stringify({ signData, capToken }), {
             headers: { 'Content-Type': 'application/json' }
         });
