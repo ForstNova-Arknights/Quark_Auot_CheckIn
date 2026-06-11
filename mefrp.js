@@ -2,7 +2,7 @@ const USER_TOKEN = process.env.USER_TOKEN;
 
 if (!USER_TOKEN) {
   console.error('❌ USER_TOKEN 环境变量未设置');
-  process.exit(1);
+  process.exit(0);
 }
 
 // 完全模拟前端 Cap 的 f 函数（FNV-1a + xorshift）
