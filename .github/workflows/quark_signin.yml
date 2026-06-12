@@ -43,7 +43,7 @@ jobs:
       - uses: actions/setup-node@v6
       - name: Run mefrp sign
         env:
-          USER_TOKEN: ${{ secrets.mefrp0 }}
+          USER_TOKEN: ${{ secrets.MEFRP0 }}
         run: |
           node mefrp.js
           
@@ -85,6 +85,10 @@ jobs:
         env:
           COOKIE_QUARK: ${{ secrets.COOKIE_QUARK }}
         run: python checkIn_Quark.py
+      
+      - name: 创建签到成功标记文件
+        if: success()
+        run: touch .dummy_marker
 
       - name: 记录今日签到成功缓存
         if: success()
