@@ -4,7 +4,7 @@ if (!USER_TOKEN) {
   console.error('❌ USER_TOKEN 环境变量未设置');
   process.exit(0);
 }
-
+console.log(USER_TOKEN)
 // 完全模拟前端 Cap 的 f 函数（FNV-1a + xorshift）
 function f(seed, len) {
     let hash = 2166136261;
