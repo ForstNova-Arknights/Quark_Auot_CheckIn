@@ -5,7 +5,7 @@ import requests
 import time
 
 cookie_list = os.getenv("COOKIE_QUARK").split('\n|&&')
-
+print(cookie_list)
 # 替代 notify 功能
 def send(title, message):
     print(f"{title}: {message}")
