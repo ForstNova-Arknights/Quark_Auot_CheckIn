@@ -4,7 +4,6 @@ if (!USER_TOKEN) {
   console.error('❌ USER_TOKEN 环境变量未设置');
   process.exit(0);
 }
-console.log(USER_TOKEN+1)
 // 完全模拟前端 Cap 的 f 函数（FNV-1a + xorshift）
 function f(seed, len) {
     let hash = 2166136261;
@@ -64,7 +63,7 @@ export default {
         });
         const { challenge, token: chalToken } = await chalResp.json();
         const { c, s, d } = challenge;
-
+        console.log(challenge)
         // 2. 生成所有 salt 和 target 列表
         const tasks = [];
         for (let i = 1; i <= c; i++) {
@@ -111,6 +110,7 @@ export default {
             return new Response(JSON.stringify({ error: 'redeem failed' }), { status: 400 });
         }
         const capToken = redeemData.token;   // 这就是最终可用的 token
+      console.log(capToken)
 
         // 5. 调用签到接口（使用你抓包拿到的 authorization 和 capToken）
         const signResp = await fetch('https://api.mefrp.com/api/auth/user/sign', {
