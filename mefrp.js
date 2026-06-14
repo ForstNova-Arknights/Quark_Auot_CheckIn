@@ -107,6 +107,11 @@ async function solveChallenge(saltHex, targetHex) {
       },
       body: JSON.stringify({ captchaToken: capToken }),
     });
+    if (!signResp.ok) {
+      const errorText = await signResp.text();
+      console.error(`签到请求失败 (${signResp.status}):`, errorText);
+      process.exit(1);
+    }
     const signData = await signResp.json();
 
     console.log('签到结果:', JSON.stringify(signData, null, 2));
