@@ -90,6 +90,9 @@ jobs:
         if: success()
         run: touch .dummy_marker
 
+      - name: 获取今日日期（北京时间）
+        run: echo "TODAY=$(TZ='Asia/Shanghai' date '+%Y-%m-%d')" >> $GITHUB_ENV
+
       - name: 记录今日签到成功缓存
         if: success()
         uses: actions/cache@v5
